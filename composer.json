@@ -1,0 +1,17 @@
+{
+    "name": "da/test-task",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Da",
+            "email": "da@platio.io"
+        }
+    ],
+    "require": {
+        "moneyphp/money": "^3.3"
+    }
+}
