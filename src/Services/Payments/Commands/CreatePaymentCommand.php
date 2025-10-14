@@ -1,22 +1,29 @@
 <?php
 
-
 namespace App\Services\Payments\Commands;
 
-
-use App\PaymentMethods\Card;
+use App\PaymentMethods\PaymentMethod;
 use Money\Money;
 
 class CreatePaymentCommand
 {
-
     private Money $amount;
-    private Card $card;
+    private PaymentMethod $paymentMethod;
+    private bool $chargeCommissionToSeller;
 
-    public function __construct(Money $amount, Card $card)
-    {
+    /**
+     * @param Money $amount Сумма платежа
+     * @param PaymentMethod $paymentMethod Способ оплаты
+     * @param bool $chargeCommissionToSeller true - комиссия с продавца, false - комиссия с покупателя
+     */
+    public function __construct(
+        Money $amount,
+        PaymentMethod $paymentMethod,
+        bool $chargeCommissionToSeller = true
+    ) {
         $this->amount = $amount;
-        $this->card = $card;
+        $this->paymentMethod = $paymentMethod;
+        $this->chargeCommissionToSeller = $chargeCommissionToSeller;
     }
 
     public function getAmount(): Money
@@ -24,8 +31,13 @@ class CreatePaymentCommand
         return $this->amount;
     }
 
-    public function getCard(): Card
+    public function getPaymentMethod(): PaymentMethod
     {
-        return $this->card;
+        return $this->paymentMethod;
+    }
+
+    public function isChargeCommissionToSeller(): bool
+    {
+        return $this->chargeCommissionToSeller;
     }
 }

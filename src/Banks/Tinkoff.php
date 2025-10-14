@@ -5,13 +5,14 @@ namespace App\Banks;
 use App\Banks\Responses\Payment;
 use App\PaymentMethods\Card;
 use App\PaymentMethods\PaymentMethod;
-use App\PaymentMethods\Qiwi;
 use App\Services\Payments\Errors\HttpErrorException;
 use App\Services\Payments\Errors\TimeoutException;
+use Money\Money;
 
-class Sberbank implements Bank
+class Tinkoff implements Bank
 {
-    public const NAME = 'sberbank';
+    public const NAME = 'tinkoff';
+    private const MIN_AMOUNT_RUB_MINOR = 1500000;
 
     public function getName(): string
     {
@@ -21,17 +22,12 @@ class Sberbank implements Bank
     public function createPayment(Money $amount, PaymentMethod $paymentMethod): Payment
     {
         // Симуляция возможных ошибок (для демонстрации обработки ошибок)
-        // В реальном приложении здесь был бы HTTP запрос к API банка
-        
-        // Cлучайная генерация ошибок для демонстрации
         $random = rand(1, 100);
 
-        // 5% шанс ошибки HTTP 500
         if ($random <= 5) {
             throw new HttpErrorException('Bank API returned HTTP 500', 500);
         }
 
-        // 5% шанс таймаута
         if ($random > 95) {
             throw new TimeoutException('Connection to bank timed out');
         }
@@ -41,7 +37,18 @@ class Sberbank implements Bank
 
     public function supports(PaymentMethod $paymentMethod, Money $amount): bool
     {
-        // Sberbank поддерживает Card и Qiwi
-        return $paymentMethod instanceof Card || $paymentMethod instanceof Qiwi;
+        // Tinkoff поддерживает только карты, только RUB, и только от 15000 руб
+        if (!$paymentMethod instanceof Card) {
+            return false;
+        }
+
+        if ($paymentMethod->getCurrency()->getCode() !== 'RUB') {
+            return false;
+        }
+
+        $minAmount = Money::RUB(self::MIN_AMOUNT_RUB_MINOR);
+        
+        return $amount->greaterThanOrEqual($minAmount);
     }
 }
+
